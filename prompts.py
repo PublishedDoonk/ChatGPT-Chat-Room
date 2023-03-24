@@ -35,22 +35,22 @@ def validate_api_key() -> bool:
         return False
     return True
 
-def send_prompt(messages: str) -> str:
+def send_prompt(messages: list) -> str:
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{'role':'user', 'content':messages}])
-    except:
-        print('ChatGPT rate limit reached. Resuming in one minute...')
+            messages=messages)
+    except Exception as e:
+        print(e)
         sleep(61)
         return send_prompt(messages)
     text = response['choices'][0]['message']['content'] # type: ignore
     return text.strip()
 
 class Requester_Thread(threading.Thread):
-    def __init__(self, prompt: str):
+    def __init__(self, messages: list):
         threading.Thread.__init__(self)
-        self.prompt = prompt
+        self.messages = messages
         
     def run(self):
-        self.value = send_prompt(self.prompt)
+        self.value = send_prompt(self.messages)
